@@ -8,18 +8,29 @@ Refer to the following example:
 ```yaml
 name: check commit message
 on: [push, pull_request]
+permissions:
+    contents: read
+    pull-requests: read
 jobs:
     check:
         runs-on: ubuntu-latest
         steps:
-            -name: Checkout
-             uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
 
-            -name: Check commit message
-             uses: YingHongBin/commit-message-validator@version
-             with: 
+            - name: Check commit message
+              uses: YingHongBin/commit-message-validator@version
+              with:
+                github-token: ${{ github.token }}
                 scope-values: 'scope1, scope2'
 ```
+
+### github-token
+
+Required GitHub token, defaulting to `${{ github.token }}`. For pull requests,
+grant `pull-requests: read` so the action can read commits in private repositories.
+The action runs on Node.js 24 and fetches all pages returned by the PR commits API.
+GitHub limits this endpoint to 250 commits per pull request.
 
 ### scope-values
 

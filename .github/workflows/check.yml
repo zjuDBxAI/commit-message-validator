@@ -2,6 +2,10 @@ name: check code style
 
 on: [push, pull_request]
 
+permissions:
+    contents: read
+    pull-requests: read
+
 jobs:
     check:
         runs-on: ubuntu-latest
@@ -14,4 +18,5 @@ jobs:
               env:
                 ACTIONS_STEP_DEBUG: ${{ vars.ACTIONS_STEP_DEBUG}}
               with:
+                github-token: ${{ github.token }}
                 scope-values: 'scope1,scope2'

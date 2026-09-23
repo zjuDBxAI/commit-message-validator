@@ -4,6 +4,16 @@ branding:
   icon: "code"
   color: "blue"
 
+inputs:
+  github-token:
+    description: "GitHub token with pull-requests: read permission."
+    required: true
+    default: ${{ github.token }}
+  scope-values:
+    description: "Comma-separated allowed commit scopes."
+    required: false
+    default: ""
+
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"

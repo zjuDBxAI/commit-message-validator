@@ -7,23 +7,6 @@ import {getConfig} from './config';
 import {getSetting, ISetting} from './settings';
 
 /**
- * fetch response from the given url and map the response to commit messages
- *
- * @param url given url to fetch commits
- * @returns string array of commit messages
- */
-async function fetchCommitMessages(url: string): Promise<string[]> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch commits from ${url}, status: ${response.status}`,
-    );
-  }
-  const commits = await response.json();
-  return commits.map(commit => commit.commit.message);
-}
-
-/**
  * extract commit messages based on the trigger event
  *
  * @param eventName trigger event name
@@ -33,8 +16,15 @@ async function getCommitMessages(eventName: string): Promise<string[]> {
   core.debug(`Event name: ${eventName}`);
   if (eventName === 'pull_request') {
     const prEvent = github.context.payload as PullRequestEvent;
-    const commits_url: string = prEvent.pull_request.commits_url;
-    return fetchCommitMessages(commits_url);
+    const octokit = github.getOctokit(
+      core.getInput('github-token', {required: true}),
+    );
+    const commits = await octokit.paginate(octokit.rest.pulls.listCommits, {
+      ...github.context.repo,
+      pull_number: prEvent.pull_request.number,
+      per_page: 100,
+    });
+    return commits.map(commit => commit.commit.message);
   } else if (eventName === 'push') {
     const pushEvent = github.context.payload as PushEvent;
     const commits: Commit[] = pushEvent.commits;
